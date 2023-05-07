@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Delete Product</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 10px;
+      }
+      a.button {
+        display: inline-block;
+        background-color: #d9534f;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 3px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+      a.button:hover {
+        background-color: #c9302c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Delete Product</h1>
+    <p>Select a product to delete:</p>
+    <ul id="productList">
+      <!-- Use JavaScript to generate the list of products from the API response -->
+    </ul>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const authToken = urlParams.get('token');
+      // Define the API endpoint and authorization token
+      const apiUrl = 'http://0.0.0.0:8000/products/all_products';
+      
+      // Define the function to fetch the list of products from the API
+      async function fetchProducts() {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await response.json();
+        const products = data.response_data;
+        const listItems = products.map(product => `
+          <li>
+            <span>${product.item_name}</span>
+            <button class="button" onclick="deleteProduct('${product.item_name}')">Delete</button>
+          </li>
+        `);
+        document.getElementById('productList').innerHTML = listItems.join('');
+      }
+      
+      // Define the function to delete a product from the API
+      async function deleteProduct(itemName) {
+        const deleteUrl = `http://0.0.0.0:8000/products/delete_product?item_name=${encodeURIComponent(itemName)}`;
+        const response = await fetch(deleteUrl, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await response.json();
+        alert(data.response_title);
+        // Refresh the list of products
+        fetchProducts();
+      }
+      
+      // Call the fetchProducts function when the page loads
+      fetchProducts();
+    </script>
+  </body>
+</html>
